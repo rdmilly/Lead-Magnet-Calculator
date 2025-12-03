@@ -977,7 +977,7 @@
           <p class="cta-body">Most of our clients recover 50-80% of this lost revenue within 90 days. Let's talk about your specific situation.</p>
           <div class="cta-buttons">
             <!-- TODO: Replace # with actual Calendly/booking link -->
-            <a href="https://tidycal.com/revenuefirst/15-minute-meeting" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+            <a id="booking-cta" href="https://tidycal.com/revenuefirst/15-minute-meeting" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
               Book a Free 15-Min Revenue Audit
               <span aria-hidden="true">→</span>
             </a>
@@ -1200,9 +1200,35 @@
       requestAnimationFrame(update);
     }
 
+    // Update TidyCal booking link with pre-filled name and email
+    function updateBookingLink() {
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const bookingLink = document.getElementById('booking-cta');
+      
+      let url = 'https://tidycal.com/revenuefirst/15-minute-meeting';
+      const params = [];
+      
+      if (name) {
+        params.push('name=' + encodeURIComponent(name));
+      }
+      if (email) {
+        params.push('email=' + encodeURIComponent(email));
+      }
+      
+      if (params.length > 0) {
+        url += '?' + params.join('&');
+      }
+      
+      bookingLink.href = url;
+    }
+
     // Display results with animation
     function displayResults() {
       const results = calculatorData.results;
+      
+      // Update booking link with user's name and email
+      updateBookingLink();
 
       // Animate the monthly total
       const monthlyEl = document.getElementById('results-monthly');
