@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Revenue Leak Calculator | RevenueFirst</title>
+
+  <!-- Meta tags for social sharing -->
+  <meta property="og:title" content="How Much Revenue Are You Losing?">
+  <meta property="og:description" content="Calculate your revenue leak in 60 seconds">
+  <meta property="og:type" content="website">
+  <meta name="description" content="Most service businesses lose $3,000-$10,000+ every month to slow response times and broken follow-up. Find out your number in 60 seconds.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* CSS Reset & Base Styles */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary: #2563EB;
+      --primary-hover: #1D4ED8;
+      --accent: #10B981;
+      --warning: #EF4444;
+      --background: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --text-primary: #1E293B;
+      --text-secondary: #64748B;
+      --text-muted: #94A3B8;
+      --border: #E2E8F0;
+      --border-focus: #2563EB;
+      --blue-tint: #EFF6FF;
+    }
+
+    html {
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: var(--background);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Main Container */
+    .calculator-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    @media (min-width: 640px) {
+      .calculator-container {
+        padding: 3rem;
+      }
+    }
+
+    /* Screen Wrapper */
+    .screen {
+      width: 100%;
+      max-width: 600px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .screen.fade-out {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+
+    /* Logo */
+    .logo {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .logo span {
+      color: var(--text-primary);
+    }
+
+    /* Welcome Screen */
+    .welcome-content {
+      text-align: center;
+    }
+
+    .welcome-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      display: block;
+    }
+
+    .headline {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    @media (min-width: 640px) {
+      .headline {
+        font-size: 2.5rem;
+      }
+    }
+
+    .subheadline {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      margin-bottom: 2.5rem;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      font-size: 1.125rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+      box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+      width: 100%;
+      min-width: 250px;
+    }
+
+    @media (min-width: 640px) {
+      .btn-primary {
+        width: auto;
+      }
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 12px rgba(37, 99, 235, 0.25);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--text-secondary);
+      padding: 0.75rem 1.5rem;
+      font-size: 0.875rem;
+    }
+
+    .btn-secondary:hover {
+      color: var(--primary);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .small-text {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 1rem;
+    }
+
+    /* Progress Indicator */
+    .progress-container {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .progress-text {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background-color: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background-color: var(--primary);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+
+    /* Question Screens */
+    .question-content {
+      text-align: center;
+    }
+
+    .question {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .question-subtitle {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+    }
+
+    /* Industry Cards Grid */
+    .industry-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (min-width: 640px) {
+      .industry-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .industry-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .industry-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+    }
+
+    .industry-card.selected {
+      border: 2px solid var(--primary);
+      background-color: var(--blue-tint);
+    }
+
+    .industry-card .icon {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .industry-card .label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    /* Input Fields */
+    .input-container {
+      max-width: 300px;
+      margin: 0 auto 1.5rem;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-prefix {
+      position: absolute;
+      left: 1rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+      font-family: inherit;
+      text-align: center;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      background: var(--card-bg);
+    }
+
+    .form-input.has-prefix {
+      padding-left: 2.5rem;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .form-input.error {
+      border-color: var(--warning);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .error-message {
+      color: var(--warning);
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    .error-message.visible {
+      display: block;
+    }
+
+    /* Option Cards (Vertical Stack) */
+    .options-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .option-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .option-card:hover {
+      background-color: var(--background);
+      border-color: var(--primary);
+    }
+
+    .option-card.selected {
+      border: 2px solid var(--primary);
+      background-color: var(--blue-tint);
+    }
+
+    .option-card .icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .option-card .text {
+      flex: 1;
+    }
+
+    .option-card .title {
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 1rem;
+    }
+
+    .option-card .subtitle {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-top: 0.125rem;
+    }
+
+    .option-card .check {
+      font-size: 1.25rem;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    .option-card.selected .check {
+      opacity: 1;
+    }
+
+    /* Email Capture */
+    .email-form {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .email-input-group {
+      margin-bottom: 1rem;
+    }
+
+    .email-input-group label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+      text-align: left;
+    }
+
+    .email-input {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      font-size: 1rem;
+      font-family: inherit;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      background: var(--card-bg);
+    }
+
+    .email-input:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Results Screen */
+    .results-container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .results-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (min-width: 640px) {
+      .results-card {
+        padding: 2rem;
+      }
+    }
+
+    .results-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .results-amount {
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--warning);
+      line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+
+    @media (min-width: 640px) {
+      .results-amount {
+        font-size: 4rem;
+      }
+    }
+
+    .results-period {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+    }
+
+    .results-annual {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .results-annual span {
+      color: var(--warning);
+    }
+
+    /* Breakdown Section */
+    .breakdown {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: left;
+    }
+
+    .breakdown-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+    }
+
+    .breakdown-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .breakdown-row:last-child {
+      border-bottom: none;
+    }
+
+    .breakdown-label {
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+    }
+
+    .breakdown-value {
+      font-weight: 600;
+      color: var(--warning);
+      font-size: 0.9375rem;
+    }
+
+    /* CTA Section */
+    .cta-section {
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .cta-headline {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .cta-body {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .cta-buttons .btn-primary {
+      width: 100%;
+    }
+
+    @media (min-width: 640px) {
+      .cta-buttons .btn-primary {
+        width: auto;
+        min-width: 300px;
+      }
+    }
+
+    /* Loading Animation */
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+    }
+
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-text {
+      margin-top: 1rem;
+      color: var(--text-secondary);
+      font-size: 1rem;
+    }
+
+    /* Hide/Show Classes */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Accessibility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Focus visible for keyboard navigation */
+    .industry-card:focus-visible,
+    .option-card:focus-visible,
+    .btn:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    /* Pulse animation for results */
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+
+    .results-amount.animate {
+      animation: pulse 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <main class="calculator-container">
+    <!-- Screen 1: Welcome -->
+    <section class="screen active" id="screen-welcome" aria-labelledby="welcome-headline">
+      <div class="welcome-content">
+        <div class="logo">Revenue<span>First</span></div>
+        <span class="welcome-icon" aria-hidden="true">💸</span>
+        <h1 id="welcome-headline" class="headline">How Much Revenue Is Slipping Through the Cracks?</h1>
+        <p class="subheadline">Most service businesses lose $3,000-$10,000+ every month to slow response times and broken follow-up. Find out your number in 60 seconds.</p>
+        <button type="button" class="btn btn-primary" onclick="goToScreen(2)">
+          Calculate My Revenue Leak
+          <span aria-hidden="true">→</span>
+        </button>
+        <p class="small-text">Free • Takes 60 seconds • No spam</p>
+      </div>
+    </section>
+
+    <!-- Screen 2: Industry Selection -->
+    <section class="screen" id="screen-industry" aria-labelledby="industry-question">
+      <div class="progress-container">
+        <p class="progress-text">Step 1 of 5</p>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 20%"></div>
+        </div>
+      </div>
+      <div class="question-content">
+        <h2 id="industry-question" class="question">What type of service business do you run?</h2>
+        <p class="question-subtitle">Select the option that best describes your business</p>
+        <div class="industry-grid" role="radiogroup" aria-labelledby="industry-question">
+          <button type="button" class="industry-card" data-value="moving" onclick="selectIndustry(this)" role="radio" aria-checked="false">
+            <span class="icon" aria-hidden="true">🚚</span>
+            <span class="label">Moving Company</span>
+          </button>
+          <button type="button" class="industry-card" data-value="hvac" onclick="selectIndustry(this)" role="radio" aria-checked="false">
+            <span class="icon" aria-hidden="true">🔧</span>
+            <span class="label">HVAC / Plumbing</span>
+          </button>
+          <button type="button" class="industry-card" data-value="landscaping" onclick="selectIndustry(this)" role="radio" aria-checked="false">
+            <span class="icon" aria-hidden="true">🌿</span>
+            <span class="label">Landscaping / Lawn Care</span>
+          </button>
+          <button type="button" class="industry-card" data-value="cleaning" onclick="selectIndustry(this)" role="radio" aria-checked="false">
+            <span class="icon" aria-hidden="true">🧹</span>
+            <span class="label">Cleaning Service</span>
+          </button>
+          <button type="button" class="industry-card" data-value="contractor" onclick="selectIndustry(this)" role="radio" aria-checked="false">
+            <span class="icon" aria-hidden="true">🔨</span>
+            <span class="label">Contractor / Trades</span>
+          </button>
+          <button type="button" class="industry-card" data-value="other" onclick="selectIndustry(this)" role="radio" aria-checked="false">
+            <span class="icon" aria-hidden="true">🏢</span>
+            <span class="label">Other Service Business</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 3: Monthly Leads -->
+    <section class="screen" id="screen-leads" aria-labelledby="leads-question">
+      <div class="progress-container">
+        <p class="progress-text">Step 2 of 5</p>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 40%"></div>
+        </div>
+      </div>
+      <div class="question-content">
+        <h2 id="leads-question" class="question">How many leads or inquiries do you get per month?</h2>
+        <p class="question-subtitle">Include phone calls, form submissions, emails — all of them.</p>
+        <div class="input-container">
+          <div class="input-wrapper">
+            <input
+              type="number"
+              id="monthly-leads"
+              class="form-input"
+              placeholder="e.g., 50"
+              min="1"
+              inputmode="numeric"
+              aria-describedby="leads-error"
+            >
+          </div>
+          <p id="leads-error" class="error-message">Please enter a number greater than 0</p>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="validateAndContinue('leads')">
+          Continue
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Screen 4: Average Job Value -->
+    <section class="screen" id="screen-value" aria-labelledby="value-question">
+      <div class="progress-container">
+        <p class="progress-text">Step 3 of 5</p>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 60%"></div>
+        </div>
+      </div>
+      <div class="question-content">
+        <h2 id="value-question" class="question">What's your average job or project value?</h2>
+        <p class="question-subtitle">A rough estimate is fine. Think about your typical customer.</p>
+        <div class="input-container">
+          <div class="input-wrapper">
+            <span class="input-prefix" aria-hidden="true">$</span>
+            <input
+              type="number"
+              id="job-value"
+              class="form-input has-prefix"
+              placeholder="e.g., 500"
+              min="1"
+              inputmode="numeric"
+              aria-describedby="value-error"
+            >
+          </div>
+          <p id="value-error" class="error-message">Please enter a value greater than 0</p>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="validateAndContinue('value')">
+          Continue
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Screen 5: Response Time -->
+    <section class="screen" id="screen-response" aria-labelledby="response-question">
+      <div class="progress-container">
+        <p class="progress-text">Step 4 of 5</p>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 80%"></div>
+        </div>
+      </div>
+      <div class="question-content">
+        <h2 id="response-question" class="question">How quickly do you respond to new leads?</h2>
+        <p class="question-subtitle">Be honest — we're calculating reality, not the goal.</p>
+        <div class="options-stack" role="radiogroup" aria-labelledby="response-question">
+          <button type="button" class="option-card" data-value="5min" onclick="selectOption(this, 'response')" role="radio" aria-checked="false">
+            <span class="icon" aria-hidden="true">⚡</span>
+            <div class="text">
+              <div class="title">Within 5 minutes</div>
+              <div class="subtitle">Our phones are always ready</div>
+            </div>
+            <span class="check" aria-hidden="true">✓</span>
+          </button>
+          <button type="button" class="option-card" data-value="1hour" onclick="selectOption(this, 'response')" role="radio" aria-checked="false">
+            <span class="icon" aria-hidden="true">🕐</span>
+            <div class="text">
+              <div class="title">Within 1 hour</div>
+              <div class="subtitle">Pretty quick</div>
+            </div>
+            <span class="check" aria-hidden="true">✓</span>
+          </button>
+          <button type="button" class="option-card" data-value="fewhours" onclick="selectOption(this, 'response')" role="radio" aria-checked="false">
+            <span class="icon" aria-hidden="true">🕑</span>
+            <div class="text">
+              <div class="title">Within a few hours</div>
+              <div class="subtitle">Same half-day usually</div>
+            </div>
+            <span class="check" aria-hidden="true">✓</span>
+          </button>
+          <button type="button" class="option-card" data-value="sameday" onclick="selectOption(this, 'response')" role="radio" aria-checked="false">
+            <span class="icon" aria-hidden="true">📆</span>
+            <div class="text">
+              <div class="title">Same day</div>
+              <div class="subtitle">By end of business</div>
+            </div>
+            <span class="check" aria-hidden="true">✓</span>
+          </button>
+          <button type="button" class="option-card" data-value="nextday" onclick="selectOption(this, 'response')" role="radio" aria-checked="false">
+            <span class="icon" aria-hidden="true">😬</span>
+            <div class="text">
+              <div class="title">Next day or longer</div>
+              <div class="subtitle">It varies...</div>
+            </div>
+            <span class="check" aria-hidden="true">✓</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 6: Follow-up System -->
+    <section class="screen" id="screen-followup" aria-labelledby="followup-question">
+      <div class="progress-container">
+        <p class="progress-text">Step 5 of 5</p>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 100%"></div>
+        </div>
+      </div>
+      <div class="question-content">
+        <h2 id="followup-question" class="question">Do you have a system to follow up with leads who don't respond?</h2>
+        <p class="question-subtitle">Automated texts, email sequences, reminder calls — anything?</p>
+        <div class="options-stack" role="radiogroup" aria-labelledby="followup-question">
+          <button type="button" class="option-card" data-value="automated" onclick="selectOption(this, 'followup')" role="radio" aria-checked="false">
+            <span class="icon" aria-hidden="true">✅</span>
+            <div class="text">
+              <div class="title">Yes, it's fully automated</div>
+              <div class="subtitle">Leads get sequences automatically</div>
+            </div>
+            <span class="check" aria-hidden="true">✓</span>
+          </button>
+          <button type="button" class="option-card" data-value="partial" onclick="selectOption(this, 'followup')" role="radio" aria-checked="false">
+            <span class="icon" aria-hidden="true">🔄</span>
+            <div class="text">
+              <div class="title">Partially automated</div>
+              <div class="subtitle">Some automation, some manual</div>
+            </div>
+            <span class="check" aria-hidden="true">✓</span>
+          </button>
+          <button type="button" class="option-card" data-value="manual" onclick="selectOption(this, 'followup')" role="radio" aria-checked="false">
+            <span class="icon" aria-hidden="true">📋</span>
+            <div class="text">
+              <div class="title">Manual process</div>
+              <div class="subtitle">We try to remember to follow up</div>
+            </div>
+            <span class="check" aria-hidden="true">✓</span>
+          </button>
+          <button type="button" class="option-card" data-value="none" onclick="selectOption(this, 'followup')" role="radio" aria-checked="false">
+            <span class="icon" aria-hidden="true">❌</span>
+            <div class="text">
+              <div class="title">Not really</div>
+              <div class="subtitle">Leads slip through the cracks</div>
+            </div>
+            <span class="check" aria-hidden="true">✓</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 7: Email Capture -->
+    <section class="screen" id="screen-email" aria-labelledby="email-headline">
+      <div class="question-content">
+        <span class="welcome-icon" aria-hidden="true">📊</span>
+        <h2 id="email-headline" class="question">Almost done!</h2>
+        <p class="subheadline">Where should we send your Revenue Leak Report?</p>
+        <p class="question-subtitle">We'll include your results plus specific recommendations for your industry.</p>
+
+        <form id="lead-form" class="email-form" name="revenue-calculator" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+          <input type="hidden" name="form-name" value="revenue-calculator">
+          <p class="hidden">
+            <label>Don't fill this out: <input name="bot-field"></label>
+          </p>
+          <!-- Hidden fields for calculator data -->
+          <input type="hidden" name="industry" id="form-industry">
+          <input type="hidden" name="monthly-leads" id="form-leads">
+          <input type="hidden" name="job-value" id="form-value">
+          <input type="hidden" name="response-time" id="form-response">
+          <input type="hidden" name="followup-system" id="form-followup">
+          <input type="hidden" name="monthly-leak" id="form-monthly-leak">
+          <input type="hidden" name="annual-leak" id="form-annual-leak">
+          <input type="hidden" name="response-leak" id="form-response-leak">
+          <input type="hidden" name="followup-leak" id="form-followup-leak">
+
+          <div class="email-input-group">
+            <label for="email">Email address *</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="email-input"
+              placeholder="your@email.com"
+              required
+              aria-describedby="email-form-error"
+            >
+          </div>
+          <div class="email-input-group">
+            <label for="name">Your name (optional)</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              class="email-input"
+              placeholder="John Smith"
+            >
+          </div>
+          <p id="email-form-error" class="error-message">Please enter a valid email address</p>
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+            See My Results
+            <span aria-hidden="true">→</span>
+          </button>
+          <p class="small-text">No spam. Unsubscribe anytime.</p>
+        </form>
+      </div>
+    </section>
+
+    <!-- Screen 8: Loading -->
+    <section class="screen" id="screen-loading" aria-label="Calculating your results">
+      <div class="loading-container">
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <p class="loading-text">Calculating your revenue leak...</p>
+      </div>
+    </section>
+
+    <!-- Screen 9: Results -->
+    <section class="screen" id="screen-results" aria-labelledby="results-headline">
+      <div class="results-container">
+        <div class="results-card">
+          <p class="results-label">Your Estimated Revenue Leak</p>
+          <p class="results-amount" id="results-monthly" aria-live="polite">$0</p>
+          <p class="results-period">per month</p>
+          <p class="results-annual">That's <span id="results-annual">$0</span> per year leaving your business</p>
+
+          <div class="breakdown">
+            <p class="breakdown-title">Where it's going:</p>
+            <div class="breakdown-row">
+              <span class="breakdown-label">Slow Lead Response</span>
+              <span class="breakdown-value" id="breakdown-response">$0/mo</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">Missing Follow-Up</span>
+              <span class="breakdown-value" id="breakdown-followup">$0/mo</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="cta-section">
+          <h3 class="cta-headline">Want to Plug These Leaks?</h3>
+          <p class="cta-body">Most of our clients recover 50-80% of this lost revenue within 90 days. Let's talk about your specific situation.</p>
+          <div class="cta-buttons">
+            <!-- TODO: Replace # with actual Calendly/booking link -->
+            <a href="https://tidycal.com/revenuefirst/15-minute-meeting" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+              Book a Free 15-Min Revenue Audit
+              <span aria-hidden="true">→</span>
+            </a>
+            <button type="button" class="btn btn-secondary">Maybe later — just email me the report</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Calculator Data Storage
+    const calculatorData = {
+      industry: null,
+      monthlyLeads: null,
+      jobValue: null,
+      responseTime: null,
+      followupSystem: null,
+      results: null
+    };
+
+    // Response Time Leak Percentages
+    const responseLeakRates = {
+      '5min': 0,
+      '1hour': 0.10,
+      'fewhours': 0.25,
+      'sameday': 0.40,
+      'nextday': 0.60
+    };
+
+    // Follow-up Leak Percentages
+    const followupLeakRates = {
+      'automated': 0,
+      'partial': 0.15,
+      'manual': 0.30,
+      'none': 0.50
+    };
+
+    // Assumed close rate for calculations
+    const CLOSE_RATE = 0.25;
+
+    // Industry display names
+    const industryNames = {
+      'moving': 'Moving Companies',
+      'hvac': 'HVAC / Plumbing',
+      'landscaping': 'Landscaping / Lawn Care',
+      'cleaning': 'Cleaning Services',
+      'contractor': 'Contractors / Trades',
+      'other': 'Service Businesses'
+    };
+
+    // Current screen tracking
+    let currentScreen = 1;
+
+    // Navigate to a specific screen
+    function goToScreen(screenNumber) {
+      const currentEl = document.querySelector('.screen.active');
+      const screenIds = [
+        'screen-welcome',
+        'screen-industry',
+        'screen-leads',
+        'screen-value',
+        'screen-response',
+        'screen-followup',
+        'screen-email',
+        'screen-loading',
+        'screen-results'
+      ];
+
+      const nextEl = document.getElementById(screenIds[screenNumber - 1]);
+
+      if (currentEl && nextEl) {
+        // Fade out current
+        currentEl.classList.add('fade-out');
+
+        setTimeout(() => {
+          currentEl.classList.remove('active', 'fade-out');
+          nextEl.classList.add('active');
+          currentScreen = screenNumber;
+
+          // Focus management for accessibility
+          const firstFocusable = nextEl.querySelector('button, input, a');
+          if (firstFocusable) {
+            setTimeout(() => firstFocusable.focus(), 100);
+          }
+        }, 200);
+      }
+    }
+
+    // Handle industry card selection
+    function selectIndustry(element) {
+      // Remove selection from all cards
+      document.querySelectorAll('#screen-industry .industry-card').forEach(card => {
+        card.classList.remove('selected');
+        card.setAttribute('aria-checked', 'false');
+      });
+
+      // Select clicked card
+      element.classList.add('selected');
+      element.setAttribute('aria-checked', 'true');
+
+      // Store data
+      calculatorData.industry = element.dataset.value;
+
+      // Auto-advance after delay
+      setTimeout(() => goToScreen(3), 300);
+    }
+
+    // Handle option card selection (response time & follow-up)
+    function selectOption(element, type) {
+      const container = element.closest('.options-stack');
+
+      // Remove selection from all options in this group
+      container.querySelectorAll('.option-card').forEach(card => {
+        card.classList.remove('selected');
+        card.setAttribute('aria-checked', 'false');
+      });
+
+      // Select clicked option
+      element.classList.add('selected');
+      element.setAttribute('aria-checked', 'true');
+
+      // Store data
+      if (type === 'response') {
+        calculatorData.responseTime = element.dataset.value;
+        setTimeout(() => goToScreen(6), 300);
+      } else if (type === 'followup') {
+        calculatorData.followupSystem = element.dataset.value;
+        setTimeout(() => goToScreen(7), 300);
+      }
+    }
+
+    // Validate numeric inputs and continue
+    function validateAndContinue(type) {
+      let input, errorEl, nextScreen;
+
+      if (type === 'leads') {
+        input = document.getElementById('monthly-leads');
+        errorEl = document.getElementById('leads-error');
+        nextScreen = 4;
+      } else if (type === 'value') {
+        input = document.getElementById('job-value');
+        errorEl = document.getElementById('value-error');
+        nextScreen = 5;
+      }
+
+      const value = parseFloat(input.value);
+
+      if (!value || value <= 0) {
+        input.classList.add('error');
+        errorEl.classList.add('visible');
+        input.focus();
+        return;
+      }
+
+      // Clear error state
+      input.classList.remove('error');
+      errorEl.classList.remove('visible');
+
+      // Store data
+      if (type === 'leads') {
+        calculatorData.monthlyLeads = value;
+      } else if (type === 'value') {
+        calculatorData.jobValue = value;
+      }
+
+      goToScreen(nextScreen);
+    }
+
+    // Calculate the revenue leak
+    function calculateLeak() {
+      const { monthlyLeads, jobValue, responseTime, followupSystem } = calculatorData;
+
+      // Step 1: Response Time Leak
+      const responseLeakPct = responseLeakRates[responseTime];
+      const leadsLostToResponse = monthlyLeads * responseLeakPct;
+      const responseLeakDollars = leadsLostToResponse * jobValue * CLOSE_RATE;
+
+      // Step 2: Follow-up Leak (applied to remaining leads)
+      const remainingLeads = monthlyLeads - leadsLostToResponse;
+      const followupLeakPct = followupLeakRates[followupSystem];
+      const leadsLostToFollowup = remainingLeads * followupLeakPct;
+      const followupLeakDollars = leadsLostToFollowup * jobValue * CLOSE_RATE;
+
+      // Totals
+      const monthlyLeak = responseLeakDollars + followupLeakDollars;
+      const annualLeak = monthlyLeak * 12;
+
+      return {
+        responseLeak: Math.round(responseLeakDollars),
+        followupLeak: Math.round(followupLeakDollars),
+        monthlyTotal: Math.round(monthlyLeak),
+        annualTotal: Math.round(annualLeak)
+      };
+    }
+
+    // Animate number count-up
+    function animateValue(element, start, end, duration, prefix = '', suffix = '') {
+      const startTime = performance.now();
+
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // Ease-out function
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(start + (end - start) * easeOut);
+
+        element.textContent = prefix + current.toLocaleString() + suffix;
+
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          // Add pulse animation when complete
+          element.classList.add('animate');
+          setTimeout(() => element.classList.remove('animate'), 300);
+        }
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    // Display results with animation
+    function displayResults() {
+      const results = calculatorData.results;
+
+      // Animate the monthly total
+      const monthlyEl = document.getElementById('results-monthly');
+      animateValue(monthlyEl, 0, results.monthlyTotal, 1500, '$');
+
+      // Animate the annual total
+      const annualEl = document.getElementById('results-annual');
+      animateValue(annualEl, 0, results.annualTotal, 1500, '$');
+
+      // Set breakdown values (no animation)
+      setTimeout(() => {
+        document.getElementById('breakdown-response').textContent = '$' + results.responseLeak.toLocaleString() + '/mo';
+        document.getElementById('breakdown-followup').textContent = '$' + results.followupLeak.toLocaleString() + '/mo';
+      }, 500);
+    }
+
+    // Handle form submission
+    document.getElementById('lead-form').addEventListener('submit', function(e) {
+      const emailInput = document.getElementById('email');
+      const emailError = document.getElementById('email-form-error');
+
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailInput.value)) {
+        e.preventDefault();
+        emailInput.classList.add('error');
+        emailError.classList.add('visible');
+        emailInput.focus();
+        return;
+      }
+
+      // Clear error state
+      emailInput.classList.remove('error');
+      emailError.classList.remove('visible');
+
+      // Calculate results
+      calculatorData.results = calculateLeak();
+
+      // Populate hidden form fields
+      document.getElementById('form-industry').value = calculatorData.industry;
+      document.getElementById('form-leads').value = calculatorData.monthlyLeads;
+      document.getElementById('form-value').value = calculatorData.jobValue;
+      document.getElementById('form-response').value = calculatorData.responseTime;
+      document.getElementById('form-followup').value = calculatorData.followupSystem;
+      document.getElementById('form-monthly-leak').value = calculatorData.results.monthlyTotal;
+      document.getElementById('form-annual-leak').value = calculatorData.results.annualTotal;
+      document.getElementById('form-response-leak').value = calculatorData.results.responseLeak;
+      document.getElementById('form-followup-leak').value = calculatorData.results.followupLeak;
+
+      // Prevent default form submission for now (show results first)
+      e.preventDefault();
+
+      // Show loading screen
+      goToScreen(8);
+
+      // Submit form in background
+      const formData = new FormData(this);
+
+      fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData).toString()
+      }).catch(err => {
+        console.log('Form submission handled by Netlify or failed silently');
+      });
+
+      // Show results after brief loading
+      setTimeout(() => {
+        goToScreen(9);
+        setTimeout(displayResults, 300);
+      }, 1500);
+    });
+
+    // Handle Enter key on inputs
+    document.getElementById('monthly-leads').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        validateAndContinue('leads');
+      }
+    });
+
+    document.getElementById('job-value').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        validateAndContinue('value');
+      }
+    });
+
+    // Clear error state on input
+    document.getElementById('monthly-leads').addEventListener('input', function() {
+      this.classList.remove('error');
+      document.getElementById('leads-error').classList.remove('visible');
+    });
+
+    document.getElementById('job-value').addEventListener('input', function() {
+      this.classList.remove('error');
+      document.getElementById('value-error').classList.remove('visible');
+    });
+
+    document.getElementById('email').addEventListener('input', function() {
+      this.classList.remove('error');
+      document.getElementById('email-form-error').classList.remove('visible');
+    });
+  </script>
+</body>
+</html>
